@@ -1,5 +1,6 @@
 import type { QrisField, QrisObject } from "./types";
 import { TAGS } from "./grammar/tags";
+import { getTagMeta } from "./grammar/getTagMeta";
 
 function isTemplate(id: string): boolean {
   return TAGS[id]?.template ?? false;
@@ -10,7 +11,11 @@ interface ParseResult {
   nextPos: number;
 }
 
-function parseFieldList(data: string, pos: number): ParseResult {
+function parseFieldList(
+  data: string,
+  pos: number,
+  parentId?: string
+): ParseResult {
   const fields: QrisObject = [];
 
   while (pos + 4 <= data.length) {
@@ -19,7 +24,7 @@ function parseFieldList(data: string, pos: number): ParseResult {
     const len = parseInt(lenStr, 10);
 
     if (Number.isNaN(len) || len < 0) {
-      throw new Error(`Invalid length for ID ${id} at position ${pos}`);
+      throw new Error(`Invalid length for ${id} at position ${pos}`);
     }
 
     const valueStart = pos + 4;
@@ -35,11 +40,14 @@ function parseFieldList(data: string, pos: number): ParseResult {
 
     let value: string | QrisField[] = rawValue;
     if (isTemplate(id)) {
-      // Recursively parse subfields
-      value = parseFieldList(rawValue, 0).fields;
+      // Recursively parse subfields, passing current id as parent context
+      value = parseFieldList(rawValue, 0, id).fields;
     }
 
-    fields.push({ id, value, name: TAGS[id]?.name });
+    const meta = getTagMeta(id, parentId);
+    const name = meta?.name;
+
+    fields.push({ id, value, name });
 
     pos = valueEnd;
 
