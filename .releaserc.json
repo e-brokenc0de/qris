@@ -7,7 +7,9 @@
     [
       "@semantic-release/npm",
       {
-        "pkgRoot": "."
+        "pkgRoot": ".",
+        "access": "public",
+        "npmPublish": true
       }
     ],
     "@semantic-release/github",
