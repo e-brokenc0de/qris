@@ -1,7 +1,7 @@
 {
   "name": "@brokenc0de/qris",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Utilities to parse, validate and generate strings compliant with QRIS (Quick Response Code Indonesian Standard)",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
