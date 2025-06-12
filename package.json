@@ -1,0 +1,14 @@
+{
+  "name": "@brokenc0de/qris",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "QRIS library",
+  "author": "brokenc0de",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
