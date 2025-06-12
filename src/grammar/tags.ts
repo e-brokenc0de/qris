@@ -14,7 +14,7 @@ const rawTags: Record<string, Omit<TagMeta, "constant">> = {
     id: "00",
     name: "Payload Format Indicator",
     minLength: 2,
-    maxLength: 2,
+    maxLength: 30,
     required: true,
   },
   "01": {
@@ -28,11 +28,18 @@ const rawTags: Record<string, Omit<TagMeta, "constant">> = {
   ...Object.fromEntries(
     Array.from({ length: 26 }).map((_, i) => {
       const id = String(i + 26).padStart(2, "0");
+      let name = `Merchant Account Information ${id}`;
+      if (id === "26") {
+        name = "Merchant Presented QR";
+      } else if (id === "51") {
+        name = "National Switch";
+      }
+
       return [
         id,
         {
           id,
-          name: `Merchant Account Information ${id}`,
+          name,
           template: true,
         } as TagMeta,
       ];
@@ -92,9 +99,16 @@ const rawTags: Record<string, Omit<TagMeta, "constant">> = {
 // Add template IDs 26–51 dynamically
 for (let i = 26; i <= 51; i++) {
   const id = String(i).padStart(2, "0");
+  let name = `Merchant Account Information ${id}`;
+  if (id === "26") {
+    name = "Merchant Presented QR";
+  } else if (id === "51") {
+    name = "National Switch";
+  }
+
   rawTags[id] = {
     id,
-    name: `Merchant Account Information ${id}`,
+    name,
     template: true,
   } as any;
 }
@@ -116,4 +130,33 @@ for (const [id, meta] of Object.entries(rawTags)) {
   TAGS[id] = full;
   NUM_TO_CONST[id] = constant;
   CONST_TO_NUM[constant] = id;
+}
+
+// ---------------------------------------------------------------------------
+// Sub-tag definitions for specific templates (e.g., Merchant Account Info 26)
+// ---------------------------------------------------------------------------
+
+// Raw sub-tag definitions keyed by parent template ID then by sub-tag ID.
+const rawSubTags: Record<string, Record<string, Omit<TagMeta, "constant">>> = {
+  "26": {
+    "00": { id: "00", name: "Globally Unique Identifier" },
+    "01": { id: "01", name: "Merchant ID" },
+    "02": { id: "02", name: "Store / terminal identifier" },
+    "03": { id: "03", name: "Processor / acquirer code" },
+  },
+  "51": {
+    "00": { id: "00", name: "National switch GUID" },
+    "02": { id: "02", name: "Reference issued by the switch" },
+    "03": { id: "03", name: "Same acquirer code carried forward" },
+  },
+};
+
+export const SUB_TAGS: Record<string, Record<string, TagMeta>> = {};
+
+for (const [parent, children] of Object.entries(rawSubTags)) {
+  SUB_TAGS[parent] = {};
+  for (const [id, meta] of Object.entries(children)) {
+    const constant = toConst(meta.name);
+    SUB_TAGS[parent][id] = { ...meta, constant } as TagMeta;
+  }
 }
