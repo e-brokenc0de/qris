@@ -8,7 +8,7 @@ describe("Nested template (ID 26) handling", () => {
       id: "26",
       value: [
         { id: "00", value: "IDDANA" },
-        { id: "01", value: "123456789012345" },
+        { id: "02", value: "123456789012345" },
       ],
     },
     { id: "52", value: "0000" },
@@ -29,10 +29,9 @@ describe("Nested template (ID 26) handling", () => {
     expect(template26!.value.length).toBe(2);
   });
 
-  it("currently fails validation due to global length constraints", () => {
+  it("passes validation with correct subfield mapping", () => {
     const res = validateQris(raw);
-    expect(res.valid).toBe(false);
-    // should include error for inner "00" length
-    expect(res.errors.find((e) => e.id === "00")).toBeDefined();
+    expect(res.valid).toBe(true);
+    expect(res.errors.length).toBe(0);
   });
 });
