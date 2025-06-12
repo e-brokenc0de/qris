@@ -99,7 +99,7 @@ Run commands straight from your terminal — no project setup needed.
 
 ```sh
 # One-off (recommended)
-bunx qris-utils <command> "<qris>"
+bunx @brokenc0de/qris <command> "<qris>"
 
 # Or install globally
 bun add -g @brokenc0de/qris          # Bun
