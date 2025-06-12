@@ -2,6 +2,13 @@
   "branches": ["master", { "name": "next", "prerelease": true }],
   "plugins": [
     "@semantic-release/commit-analyzer",
+    {
+      "preset": "conventionalcommits",
+      "releaseRules": [
+        { "type": "ci", "scope": "release", "release": "patch" },
+        { "type": "chore", "scope": "release", "release": "patch" }
+      ]
+    },
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     [
