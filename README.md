@@ -1,41 +1,59 @@
 # QRIS Utils
 
-> Parse, validate and generate strings compliant with **QRIS – Quick Response Code Indonesian Standard** (Merchant Presented Mode, static & dynamic).
+Lightweight TypeScript toolkit to **parse, validate and generate** strings that follow the _QRIS – Quick Response Code Indonesian Standard_ (Merchant Presented Mode — static & dynamic).
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API](#api)
+- [CLI](#cli-optional)
+- [Development](#development)
+- [License](#license)
+
+---
+
+## Features
+
+- 📦 **Fully-typed** API (ESM & CommonJS bundles)
+- 🔒 Transparent **CRC-16/CCITT** checksum handling
+- 🪶 **Zero-dependency**, tiny footprint
 
 ---
 
 ## Installation
 
 ```sh
-# with bun
+# Bun
 bun add @brokenc0de/qris
 
-# or with npm
+# npm / pnpm / yarn
 npm install @brokenc0de/qris
 ```
 
-> **Note** The package ships as ESM + CJS builds and is fully typed (d.ts).
+> The package ships with ESM _and_ CJS builds & ships its own `.d.ts` typings.
 
 ---
 
-## Quick-start
+## Quick Start
 
 ```ts
 import { parseQris, validateQris, generateQris } from "@brokenc0de/qris";
 
-const raw = `00020101021226590016A0110100000000000270530303105802040758026559009TOKOPEDIA6013JAKARTA UTARA61051234562620450053037646304C49E`;
+const raw = "00020101021226590016A011010000000000027053030310580204...C49E";
 
 // 1️⃣ Parse → AST
 const ast = parseQris(raw);
 
-// 2️⃣ Validate
+// 2️⃣ Validate (structure + CRC)
 const { valid, errors } = validateQris(raw);
-if (!valid) console.error(errors);
 
-// 3️⃣ Modify & regenerate
-const amountField = ast.find((f) => f.id === "54");
-if (amountField) amountField.value = "1000";
-const newRaw = generateQris(ast); // CRC auto-recalculated
+// 3️⃣ Manipulate and (optionally) regenerate
+ast.find((f) => f.id === "54")!.value = "50000.00"; // change amount
+const updated = generateQris(ast); // CRC is appended automatically
 ```
 
 ---
@@ -44,20 +62,20 @@ const newRaw = generateQris(ast); // CRC auto-recalculated
 
 ### `parseQris(raw: string): QrisObject`
 
-Returns an array of `QrisField` objects (recursive AST). Throws if the string is malformed.
+Converts a QRIS string into a recursive array of `QrisField` objects. Throws on malformed input.
 
 ### `generateQris(obj: QrisObject, options?)`
 
-Serialises the AST back to a QRIS string. Options:
+Serialises the AST back to a QRIS string.
 
-- `includeCRC` (default `true`) – append CRC-16/CCITT checksum.
+• `includeCRC` (default `true`) — append CRC-16/CCITT checksum.
 
-### `validateQris(raw | obj)`
+### `validateQris(rawOrObj)`
 
-Returns `{ valid: boolean, errors: ValidationError[] }` performing:
+Returns `{ valid: boolean, errors: ValidationError[] }` after:
 
-- structural checks (mandatory tags, min/max length)
-- checksum verification
+- Structural checks (mandatory tags, min/max length)
+- Checksum verification
 
 ### Types
 
@@ -75,38 +93,39 @@ type QrisObject = QrisField[];
 
 ## CLI (optional)
 
-The library is code-first, but you can run quick one-offs with `bunx` / `npx`:
+Run commands straight from your terminal — no project setup needed.
+
+### Usage
 
 ```sh
-bunx qris-utils parse "<string>"
+# One-off (recommended)
+bunx qris-utils <command> "<qris>"
+
+# Or install globally
+bun add -g @brokenc0de/qris          # Bun
+npm  i  -g @brokenc0de/qris          # npm / pnpm / yarn
+
+qris-utils <command> "<qris>"
 ```
 
-(Coming soon.)
+### Available commands
+
+| Command           | Description                                                               |
+| ----------------- | ------------------------------------------------------------------------- |
+| `parse <qris>`    | Pretty-prints the AST as JSON                                             |
+| `validate <qris>` | Validates structure + CRC, prints result and exits with code 1 on failure |
+
+Example:
+
+```sh
+bunx qris-utils validate "000201010212265900..."   # ✔ QRIS string is valid.
+bunx qris-utils parse "000201010212265900..."      # → JSON AST
+```
+
+More commands (e.g. `generate`) will land in future releases.
 
 ---
 
 ## Development
 
-1. `bun install` – install deps.
-2. `bun test` – Jest unit tests (11+ assertions & fixtures).
-3. `bun run build` – Bundles with **tsup**.
-
-### Releasing
-
-- Conventional Commits + Semantic Release.
-- Push to `master` and GitHub Actions will test, build, version, publish to npm and create release notes.
-
----
-
-## Roadmap
-
-- Full BI rule-book conformance (dynamic QR / DOMESTIC MCC validation)
-- CLI utilities
-- QR image (SVG/PNG) encoder
-- 100 % unit test coverage
-
----
-
-## License
-
-MIT © brokenc0de
+1. `bun install`
